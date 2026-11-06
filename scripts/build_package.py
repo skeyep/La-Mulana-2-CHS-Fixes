@@ -1,4 +1,3 @@
-import os
 """Build a small offline Windows patch from baseline-dependent copy/XOR deltas."""
 import gzip
 import hashlib
@@ -9,9 +8,10 @@ import struct
 import zipfile
 import numpy as np
 import UnityPy
+from baseline import BASE
 
 ROOT=Path(__file__).resolve().parents[2]
-GAME=Path(os.environ['LM2_GAME_DIR'])
+GAME=BASE
 BUILD=ROOT/'build/lm2-text-patch'
 RELEASE=json.loads((ROOT/'localization/lm2/release.json').read_text(encoding='utf-8'))
 VERSION=RELEASE['version']
@@ -75,7 +75,7 @@ Windows Steam edition - app 835430, build 9559015
 Initial test build. Longer text may still need layout adjustments.
 
 Corrects {RELEASE['selected_issues']} translation and naming issues across {RELEASE['chinese_rows']} Chinese text rows.
-Includes seven missing Chinese glyphs in the three existing Chinese fonts.
+Includes {len(RELEASE['font_additions'])} missing glyphs in the three existing Chinese fonts.
 Select Chinese in the game settings after installation.
 
 INSTALL

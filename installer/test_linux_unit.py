@@ -68,4 +68,3 @@ class InstallerTest(unittest.TestCase):
                 with m.lock(self.game): pass
 
 if __name__ == '__main__': unittest.main()
-

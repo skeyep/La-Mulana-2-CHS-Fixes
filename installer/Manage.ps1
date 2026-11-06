@@ -6,6 +6,17 @@ function Hash-File([string]$Path) {
     try { ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant() }
     finally { $sha.Dispose();$stream.Dispose() }
 }
+function Replace-GameFile([string]$Staged,[string]$Destination,[string]$Rollback) {
+    $expected=Hash-File $Destination
+    for($attempt=0;$attempt -lt 8;$attempt++) {
+        try {[IO.File]::Replace($Staged,$Destination,$Rollback);return}
+        catch {
+            if($attempt -eq 7){throw}
+            Start-Sleep -Milliseconds (100*($attempt+1))
+            if((Hash-File $Destination) -ne $expected){throw 'The destination changed while waiting for its file lock.'}
+        }
+    }
+}
 function Find-Game {
     if ($GameDirectory) { return [IO.Path]::GetFullPath($GameDirectory) }
     $roots=@()
@@ -68,6 +79,7 @@ try {
     if(!(Test-Path -LiteralPath (Join-Path $game 'LaMulana2.exe'))){throw 'LaMulana2.exe was not found in the selected folder.'}
     foreach($p in @(Get-Process LaMulana2 -ErrorAction SilentlyContinue)) { if($p.Path -and [IO.Path]::GetFullPath($p.Path) -eq (Join-Path $game 'LaMulana2.exe')){throw 'Close La-Mulana 2 before installing, checking, or restoring.'} }
     $stateDir=Join-Path $game '.lm2chs-fixes';$stateFile=Join-Path $stateDir 'installed.json';$transaction=Join-Path $stateDir 'transaction.json'
+    if(Test-Path -LiteralPath (Join-Path $stateDir 'linux-transaction.json')) {throw 'A Linux operation was interrupted. Run Install.sh or Restore.sh on Linux to recover it first.'}
     if(Test-Path -LiteralPath $transaction) {
         $recover=Get-Content -Raw -LiteralPath $transaction | ConvertFrom-Json
         foreach($f in $recover.files){Copy-Item -LiteralPath $f.rollback -Destination (Join-Path $game $f.path) -Force}
@@ -113,7 +125,7 @@ try {
     }
     @{files=$txnFiles} | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 -LiteralPath $transaction
     try {
-        foreach($f in $txnFiles){[IO.File]::Replace($f.staged,(Join-Path $game $f.path),$f.rollback)}
+        foreach($f in $txnFiles){Replace-GameFile $f.staged (Join-Path $game $f.path) $f.rollback}
         $manifest | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 -LiteralPath $stateFile
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Restore-Standalone.ps1') -Destination (Join-Path $stateDir 'Restore.ps1') -Force
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Restore-Standalone.cmd') -Destination (Join-Path $stateDir 'Restore.cmd') -Force

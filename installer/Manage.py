@@ -272,4 +272,3 @@ if __name__ == '__main__':
     try: main()
     except Exception as exc:
         print('ERROR: ' + str(exc), file=sys.stderr); sys.exit(1)
-

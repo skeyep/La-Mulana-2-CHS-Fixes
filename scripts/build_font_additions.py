@@ -1,4 +1,3 @@
-import os
 """Add only the missing CHS glyphs to the three existing TMP SDF atlases."""
 import copy
 import json
@@ -9,9 +8,10 @@ from PIL import Image,ImageDraw,ImageFont
 from scipy.ndimage import distance_transform_edt
 import UnityPy
 from UnityPy.helpers.TypeTreeGenerator import TypeTreeGenerator
+from baseline import BASE
 
 ROOT=Path(__file__).resolve().parents[2]
-GAME=Path(os.environ['LM2_GAME_DIR'])
+GAME=Path('D:/SteamLibrary/steamapps/common/La-Mulana 2')
 OUT=ROOT/'build/lm2-text-patch'
 FONT=Path('C:/Windows/Fonts/NotoSansSC-VF.ttf')
 FONTS=[27627,27628,27629]
@@ -45,7 +45,7 @@ def empty_slot(occupied,w,h):
  y,x=found[0];return int(x),int(y)
 
 def main():
- OUT.mkdir(parents=True,exist_ok=True);env=UnityPy.load(str(GAME/'LaMulana2_Data/resources.assets'));objs={o.path_id:o for o in env.objects};gen,node=node_for()
+ OUT.mkdir(parents=True,exist_ok=True);env=UnityPy.load(str(BASE/'LaMulana2_Data/resources.assets'));objs={o.path_id:o for o in env.objects};gen,node=node_for()
  rows=json.loads((OUT/'rows.json').read_text(encoding='utf-8'));chars=set(''.join(x['after'] for x in rows))-{ '\n','\r','\t'};report=[]
  preview=[];expected_trees={};expected_atlases={}
  for fid in FONTS:
@@ -83,9 +83,9 @@ def main():
   arr=np.asarray(cb[r['atlas_path_id']].read().image.getchannel('A'));assert np.array_equal(arr,expected_atlases[r['atlas_path_id']])
  out={'fonts':report,'changed_objects':sorted(changed),'unrelated_objects_unchanged':len(objs)-len(changed),'all_selected_text_characters_covered':True,'glyph_source':str(FONT),'license':'SIL Open Font License 1.1'}
  (OUT/'font-additions.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
- label=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',18);canvas=Image.new('RGB',(7*140,3*135),'#242833');d=ImageDraw.Draw(canvas)
+ columns=max(1,len(report[0]['new_chars']));label=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',18);canvas=Image.new('RGB',(columns*140,3*135),'#242833');d=ImageDraw.Draw(canvas)
  for n,(fid,ch,im) in enumerate(preview):
-  x=(n%7)*140;y=(n//7)*135;d.text((x+8,y+4),f'{fid} {ch}',font=label,fill='white');im=im.resize((im.width*2,im.height*2),Image.Resampling.NEAREST);canvas.paste(Image.merge('RGB',(im,im,im)),(x+5,y+35))
+  x=(n%columns)*140;y=(n//columns)*135;d.text((x+8,y+4),f'{fid} {ch}',font=label,fill='white');im=im.resize((im.width*2,im.height*2),Image.Resampling.NEAREST);canvas.paste(Image.merge('RGB',(im,im,im)),(x+5,y+35))
  canvas.save(OUT/'font-preview.jpg',quality=95)
  print(json.dumps({k:v for k,v in out.items() if k!='fonts'},ensure_ascii=False))
 

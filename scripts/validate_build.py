@@ -1,4 +1,3 @@
-import os
 """Compare the complete static database readback to the selected source-bound operations."""
 import json,re
 from pathlib import Path
@@ -32,7 +31,7 @@ def main():
  method_diff=load(BUILD/'method-diff.json');assert method_diff['string_changes']==len(ops)
  changed={(x['method'],x['offset']):x for x in method_diff['changes']};assert len(changed)==len(ops)
  # Read fonts from the actual serialized output, reusing the already inspected glyph artwork.
- g=TypeTreeGenerator('2017.2.2f1');g.load_local_game(os.environ['LM2_GAME_DIR']);node=g.get_nodes_up('TextMeshPro.dll','TMPro.TMP_FontAsset');env=UnityPy.load(str(BUILD/'resources.assets'));objects={o.path_id:o for o in env.objects};chars=set(''.join(r['after'] for r in rows))-set('\r\n\t')
+ g=TypeTreeGenerator('2017.2.2f1');g.load_local_game('D:/SteamLibrary/steamapps/common/La-Mulana 2');node=g.get_nodes_up('TextMeshPro.dll','TMPro.TMP_FontAsset');env=UnityPy.load(str(BUILD/'resources.assets'));objects={o.path_id:o for o in env.objects};chars=set(''.join(r['after'] for r in rows))-set('\r\n\t')
  for pid in [27627,27628,27629]:assert chars<={chr(q['id']) for q in objects[pid].read_typetree(nodes=node)['m_glyphInfoList']}
  report={'selected_issues':len(review['issues']),'written_chinese_rows':len(rows),'ldstr_edits':len(ops),'database_count':len(a),'all_database_fields_match_expected':True,'jpn_eng_other_fields_and_nonselected_rows_unchanged':True,'noop_all_database_fields_unchanged':True,'full_method_instruction_comparison':'passed: only selected ldstr operands differ','all_current_characters_in_three_chinese_fonts':True,'metadata_tokens_reassigned_by_cecil':True,'natural_gameplay_windows':'pending'}
  (BUILD/'validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps(report,ensure_ascii=False))
