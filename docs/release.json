@@ -1,12 +1,13 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "date": "2026-11-06",
   "game": "LA-MULANA 2",
   "platform": "Windows Steam / Linux-Proton",
   "app_id": 835430,
   "build_id": "9559015",
-  "stage": "release-candidate",
+  "stage": "released",
   "selected_issues": 87,
   "chinese_rows": 110,
-  "font_additions": "呈嚷扉梁赎颈；凿棵筑铭"
+  "font_additions": "凿呈嚷扉昔梁棵筑赎铭颈颤；",
+  "previous_version": "0.1.1"
 }
