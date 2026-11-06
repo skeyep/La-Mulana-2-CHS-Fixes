@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>netcoreapp3.0</TargetFramework></PropertyGroup>
+  <ItemGroup><Reference Include="Mono.Cecil"><HintPath>../../build/lm2-tools/Mono.Cecil/Mono.Cecil.dll</HintPath></Reference></ItemGroup>
+</Project>
